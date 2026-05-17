@@ -1,0 +1,81 @@
+{
+  "dashboard": {
+    "title": "ML Service - p95 Latency Monitor",
+    "uid": "ml-latency-prod",
+    "tags": ["ml", "latency", "sre"],
+    "timezone": "browser",
+    "editable": true,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "p95 Request Latency",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(request_latency_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p95 latency",
+            "refId": "A"
+          }
+        ],
+        "alert": {
+          "name": "High p95 Latency Alert",
+          "conditions": [
+            {
+              "evaluator": {
+                "type": "gt",
+                "params": [1]
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "noDataState": "no_data",
+          "for": "2m",
+          "frequency": "1m",
+          "handler": 1,
+          "message": "p95 latency exceeded 1s for 2 minutes. Investigate model inference."
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0,
+            "max": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 0.8
+                },
+                {
+                  "color": "red",
+                  "value": 1.0
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      }
+    ]
+  }
+}
